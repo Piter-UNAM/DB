@@ -1,7 +1,3 @@
-https://github.com/Destroy-Youth/basedatos2
-
-
-
 Transaccion de bases de datos
 Una transaccion es una unidad atomica de trabajo con respecto a la recuperaciion y
 consistencia de datos
