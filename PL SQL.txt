@@ -1,0 +1,102 @@
+https://github.com/Destroy-Youth/basedatos2
+
+
+
+Transaccion de bases de datos
+Una transaccion es una unidad atomica de trabajo con respecto a la recuperaciion y
+consistencia de datos
+Commit, confirma la transacción de datos(eliminar datos, por ejemplo)
+rollback es para deshacer una accion de la transaccion de datos(como eliminar datos)
+Caracteristicas de una transaccion en oracle
+Atomicity	Todo o nada
+Consistency	Antes o despues
+Isolation	Cpncurrentes y aisladas
+Durability	Terminacion anormal garantizada
+
+ATM
+Automatic Teller Machine
+SET TRANSACTION NAME 'Insercion_datos';
+insert into estudiante values('4019','LOPEZ','LENNY','R','MAT');
+SAVEPOINT Despues_insertar;
+UPDATE ESTUDIANTE
+SET Nombre='Christian'
+WHERE ID_Estudiante='4019';
+
+https://en.wikipedia.org/wiki/Tuxedo_(software)#Features
+https://www.oracle.com/lad/products/middleware/cloud-app-foundation/tuxedo/tuxedo/overview/index.html
+
+SAVEPOINT Despues_actualizar;
+
+ROLLBACK TO SAVEPOINT Despues_insertar;
+
+UPDATE ESTUDIANTE
+SET Nombre='Roberto'
+WHERE ID_Estudiante='4019';
+
+ROLLBACK;
+
+SET TRANSACTION NAME 'Insercion2';
+INSERT INTO ESTUDIANTE VALUES('2097','Peres','Juan','J','ING');
+UPDATE ESTUDIANTE
+SET Nombre='Natalia'
+WHERE ID_Estudiante='2097';
+COMMIT;
+
+Gestor de base de datos utilizado por oracle se llama TUXEDO
+Que es un servidor de transacciones
+Ventajas y desventajas de tuxedo, que es, cuales son su caracteristicas
+impreso
+
+Cursores
+Es un nombre asignado a un area de memoria que contiene la informacion 
+resultante de la ejecucion de una referencia select de SQL. Es decir, 
+al momento de ejecutar una instruccion sql, el conjunto de registros
+que devuelve seran almacenados en un cursor
+
+Cursor=Tabla virtual
+
+DECLARE
+lcNombre estudiante.nombre%TYPE;
+lcApellido estudiantes.apellido%TYPE;
+BEGIN
+SELECT nombre,apellido
+	INTO lcNombre,lcApellido
+	From Estudiantes
+	WHERE nombre=''Lenny and apellido='Perez';
+
+END
+
+CREATE OR REPLACE PROCEDURE <nombre_pricedimiento>
+
+IS|AS
+	CURSOR <Nombre_cursor>
+	IS
+		SELECT <col1,col2,coln> ||*
+		FROM <tablas>
+		WHERE <condición>
+BEGIN
+		OPEN<Nombre_cursor>
+		FECTH<Nombre_curosr> INTO <>
+//Incompleto
+
+
+CREATE OR REPLACE PROCEDURE LECTURA 
+IS 
+CURSOR TABLA_VIRTUAL IS 
+SELECT *FROM ESTUDIANTE;
+ARREGLO TABLA_VIRTUAL%ROWTYPE;
+BEGIN
+OPEN TABLA_VIRTUAL;
+FETCH TABLA_VIRTUAL INTO ARREGLO;
+WHILE TABLA_VIRTUAL%FOUND
+LOOP
+DBMS_OUTPUT.PUT_LINE('NOMBRE: ' || ARREGLO.NOMBRE||' APELLIDO: '||ARREGLO.APELLIDO);
+FETCH TABLA_VIRTUAL INTO ARREGLO;
+END LOOP;
+CLOSE TABLA_VIRTUAL;
+END;
+/
+
+
+
+
