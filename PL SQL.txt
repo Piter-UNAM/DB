@@ -157,4 +157,243 @@ END;
 /
 
 
+---------------Cursor Tarea-------------------
 
+CREATE OR REPLACE PROCEDURE PARAMETROS(V_ID IN VARCHAR)
+AS
+
+CURSOR CR_PARAMETRO(V_IDS IN VARCHAR2)
+IS 
+SELECT *
+FROM ESTUDIANTE
+WHERE  ID_ESTUDIANTE=V_ID;
+
+CURSOR CR_PARAMETRO2(V_IDS IN VARCHAR2)
+IS 
+SELECT INS.NUM_CURSO, CU.NOMBRE_CURSO, CU.CREDITOS
+FROM CURSO CU INNER JOIN INSCRIPCION INS ON CU.NUM_CURSO=INS.NUM_CURSO 
+WHERE ID_ESTUDIANTE=V_id;
+
+V_RECEPTORA CR_PARAMETRO%ROWTYPE;
+V_RECEPTORA CR_PARAMETRO2%ROWTYPE;
+
+BEGIN 
+
+FOR V_RECEPTORA IN CR_PARAMETRO(V_ID)
+LOOP
+DBMS_OUTPUT.PUT_LINE('El alumno  '||V_RECEPTORA.NOMBRE||'  '||V_RECEPTORA.APELLIDO||'  esta inscrito en los cursos siguientes:');
+DBMS_OUTPUT.PUT_LINE('----------------------------------------------------------------------------');
+
+FOR V_RECEPTORA IN CR_PARAMETRO2(V_ID)
+LOOP
+DBMS_OUTPUT.PUT_LINE(V_RECEPTORA.NUM_CURSO||'  '||V_RECEPTORA.NOMBRE_CURSO||'  '|| V_RECEPTORA.CREDITOS);
+END LOOP;
+END LOOP;
+
+DBMS_OUTPUT.PUT_LINE('----------------------------------------------------------------------------');
+END;
+/
+
+Probando Cursor
+
+SQL> SET SERVEROUTPUT ON;
+SQL> EXECUTE PARAMETROS('2907');
+El alumno  PEDRO  LOPEZ  esta inscrito en los cursos siguientes:
+----------------------------------------------------------------------------
+MAT0011  MATEMATICAS DISCRETAS  8
+----------------------------------------------------------------------------
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE PARAMETROS('5145');
+El alumno  LUIS  SANTANA  esta inscrito en los cursos siguientes:
+----------------------------------------------------------------------------
+SOC0102  ASCENSO DEL HOMBRE  8
+----------------------------------------------------------------------------
+
+PL/SQL procedure successfully completed.
+
+Probando cuando el alumno no esta inscrito a algun curso
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE PARAMETROS('7810');
+El alumno  RICARDO  MARTINEZ  esta inscrito en los cursos siguientes:
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+
+PL/SQL procedure successfully completed.
+
+SQL> EXECUTE PARAMETROS('6985');
+El alumno  CARLOS  MENDIETA  esta inscrito en los cursos siguientes:
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+
+PL/SQL procedure successfully completed.
+
+---------------------------------Trigger------------------------------------
+BEFORE/AFTER: Elemento que dispara trigger
+nombre: nombre del trigger que tiene que ser unico
+FOR EACH_ Nivel del disparo del trigger que por defecto es statement, indicando que se activa una sola vez
+por cada operación, sin importar la cantidad de filas afectadas.
+FOR EACH ROW: Salta por cada fila afectada, Variables posibles para update, la primera es: old que hace 
+referencia a los valoes anteriors y :new que hace referencia a los nuevos valores de actualizacion de la fila.
+
+
++++Tabla Clientes+++
+
+create table Clientes (
+codigo varchar(2),
+nombre varchar(15),
+limite number(8,2));
+
++++trigger+++
+
+create or replace trigger insercion after insert 
+on clientes for each row
+begin 
+dbms_output.put_line('Cliente adicionado');
+end;
+/
+
++++tabla auditor+++
+
+create table Auditor(
+registro varchar2(20));
+
++++trigger+++
+
+create or replace trigger auditar_clientes
+after update
+on clientes
+for each row 
+begin 
+insert into auditor
+values(
+	'Anterior'||:old.limite||
+	' Nuevo' ||:new.limite);
+end;
+/ 
+
+SQL> create or replace trigger insercion after insert
+  2  on clientes for each row
+  3  begin
+  4  dbms_output.put_line('Cliente adicionado');
+  5  end;
+  6  /
+
+Trigger created.
+
+SQL> INSERT INTO CLIENTES VALUES('20','PABLO','4');
+
+1 row created.
+
+SQL> SET SERVEROUTPUT ON;
+SQL> INSERT INTO CLIENTES VALUES('10','PACO','3');
+Cliente adicionado
+
+1 row created.
+
+SQL> create table Auditor(
+  2  registro varchar2(20));
+
+Table created.
+
+SQL> create or replace trigger auditar_clientes
+  2  after update
+  3  on clientes
+  4  for each row
+  5  begin
+  6  insert into auditor
+  7  values(
+  8  'Anterior'||:old.limite||
+  9  ' Nuevo' ||:new.limite);
+ 10  end;
+ 11  /
+
+Trigger created.
+
+SQL> DROP TABLE AUDITOR;
+
+Table dropped.
+
+SQL> CREATE TABLE Auditor(
+  2  registro varchar2(40));
+
+Table created.
+
+SQL> UPDATE CLIENTES
+  2  SET codigo='89', nombre='PABLO', limite='4'
+  3  where codigo='10';
+
+1 row updated.
+
+SQL> SELECT * FROM AUDITOR;
+
+REGISTRO
+----------------------------------------
+Anterior3 Nuevo4
+
+SQL> SELECT * FROM CLIENTES;
+
+CO NOMBRE              LIMITE
+-- --------------- ----------
+20 PABLO                    4
+89 PABLO                    4
+
+
+SQL> create table Estados(
+  2  codigo_estado varchar(2),
+  3  nombre_estado varchar(15),
+foreign key (codigo_estado) references clientes(codigo));
+
+++++++++++ Anexar nueva columna a la tabla Clientea++++++++
+
+ALTER TABLE Clientes ADD estado VARCHAR(15);
+
+++++++++++ Asignar llave primaria a la tabla clientes++++++
+
+ALTER TABLE Clientes ADD primary key (codigo);
+
+
+create or replace view clientes_estados 
+as 
+select codigo, nombre, limite, estado, Nombre_estado
+from clientes, estados 
+where 
+clientes.estado=estados.codigo_estado;
+/
++++++++ Dar de alta datos a la tabla Estados++++++
+
+insert into Estados values('1','Mexico');
+
+create or replace trigger sustitucion 
+instead of delete or insert
+on clientes_estados
+for each row
+begin
+if deleting then 
+insert into auditor values('Borrando '||:old.limite);
+end if;
+if inserting then
+insert into auditor values('insertando '||:new.limite);
+end if;
+end;
+/
+
+insert into clientes_estados values('3','Carlos',610.2,'3','Jalisco');
+
+
+create table conexiones (usuario varchar (15),
+			momento date,
+			evento varchar (20));
+
+
+create or replace trigger ejemplo 
+after logon 
+on database
+begin
+insert into conexiones(usuario, momento, evento)
+values(ora_login_user,systimestamp,ora_sysevent);
+end;
+/
