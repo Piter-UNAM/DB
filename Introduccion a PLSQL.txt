@@ -1,0 +1,148 @@
+---Bloque Anonimo
+declare
+--Se declaran variables
+begin
+--Programación
+exception
+--Control de errores
+end;
+
+declare
+cadena varchar2(100):='Hola Mmundo';
+begin
+dbms_output.put_line(cadena);
+exception
+when others then
+dbms_output.put_line('Problema');
+end;
+
+---Bloque anonimo anidado
+
+declare
+cadena varchar2(100):='Mario Ruiz';
+cadena1 varchar2(100):='Bloque Interno';
+begin
+dbms_output.put_line(cadena);
+---Bloque anonimo interno
+	begin
+	dbms_output.put_line(cadena1);
+	exception
+	when others then 
+	dbms_output.put_line('Bloque interno Problema');
+---Fin bloque interno
+exception
+when others then
+dbms_output.put_line('Problema');
+end;
+
+---Tipos de datos
+--NUMBER[(precision, escala)]
+saldo number(16,2):=15.12;
+/*Indica que puede almacear un valor numérico de 16 posiciones, 2 de ellas
+decimales. Es decir, 14 enterós y 2 decimales*/
+
+--CHAR[(Longitud_maxima)]
+nombre CHAR(20):='Hola a todos';
+/*Indica que puede almacenar valores alfanúmericos de 20 posiciones*/
+
+--VARCHAR2 [(Longitud_maxima)]
+nombre1 VARCHAR2(20):='MRG';
+/*Indica que puede almacenar valores alfanumericos de hasta 20 posiciones*/
+/*Cuando la longitud de los datos sea menor de 20 no se rellena con blancos*/
+
+--Boleana
+1error BOOLEAN:=FALSE;
+
+--Fecha
+fecha DATE=SYSDATE;
+
+--%TYPE
+codigo_empleado mrg_cat_empleados.codigo_empleado%type;
+
+--%ROWTYPE
+TABLA 
+DBMS_OUTPUT.PUT_LINE('El saldo es de: '|| saldo);
+DBMS_OUTPUT.PUT_LINE('El nombre es: ' || nombre);
+DBMS_OUTPUT.PUT_LINE('El nombre1 es: ' || nombre1);
+DBMS_OUTPUT.PUT_LINE('La fecha es: ' || fecha);
+DBMS_OUTPUT.PUT_LINE('El codigo empleado es: ' || codigo_empleado);
+
+select * 
+into TABLA_COMPLETA
+from mrg_cat_empleados;
+
+EXCEPTION 
+WHEN OTHERS THEN
+--Aqui se controla el error
+NULL;
+END
+-----Sentencia IF-ELSIF-ELSE--------------
+
+--ESTRUCTURA BASICA DE LA SENTENCIA IF
+IF condition THEN
+	(...statements to execute when condition is TRUE...)
+END IF;
+
+--ESTRUCTURA DE LA SENTENCIA IF-ELSE
+IF condition THEN
+	(...statements to execute when condition is TRUE...)
+ELSE
+	(...statements to execute when condition is FALSE...)
+END IF;
+
+--ESTRUCTURA DE LA SENTENCIA IF-ELSIF
+IF condition THEN
+	(...statements to execute when condition is TRUE...)
+ELSIF condition2 THEN
+	(...statements to execute when condition is TRUE...)
+END IF;
+
+-ESTRUCTURA CON TODOS SUS ELEMENTOS
+IF condition THEN
+	(...statements to execute when condition is TRUE...)
+ELSIF condition THEN
+	(...statements to execute when condition is TRUE...)
+ELSE
+	(...statements to execute when both condition and condition2 are FALSE...)
+END IF;
+-------EJEMPLO CON BOOLEAN
+DECLARE 
+--DECLARACION DE VARIABLES
+VERDADERO BOOLEAN:= TRUE;
+FALSO BOOLEAN:=FALSE;
+BEGIN
+--IF DENTRO DEL BLOQUE ANONIMO
+IF VERDADERO THEN
+	DBMS_OUTPUT.PUTLINE('PRIMERA CONDICION');
+ELSE
+	DBMS_OUTPUT.PUTLINE('SEGUNDA CONDICION');
+END IF;
+EXCEPTION
+WHEN OTHERS THEN
+--AQUI VA EL CONTROL DE ERRORES
+NULL;
+END;
+-------EJEMPLO CON NUMEROS
+DECLARE
+--DECLARACION DE VARIABLES
+NUM1 NUMBER:=1;
+NUM2 NUMBER:=2;
+BEGIN
+--IF DENTRO DEL BLOQUE ANONIMO
+IF NUM1 = NUM2 THEN
+	DBMS_OUTPUT.PUTLINE('PRIMERA CONDICION');
+ELSIF NUM1 <> NUM2 THEN
+	DBMS_OUTPUT.PUTLINE('SEGUNDA CONDICION');
+ELSIF NUM1 != NUM2 THEN
+	DBMS_OUTPUT.PUTLINE('TERCERA CONDICION');
+ELSIF NUM1 <= NUM2 THEN 
+	DBMS_OUTPUT.PUTLINE('CUARTA CONDICION');
+ELSIF NUM1 >= NUM2 THEN
+	DBMS_OUTPUT.PUTLINE('QUINTA CONDICION');
+ELSE
+DBMS_OUTPUT.PUTLINE('SEXTA CONDICION');
+END IF;
+EXCEPTION
+WHEN OTHER THEN
+NULL;
+END;
