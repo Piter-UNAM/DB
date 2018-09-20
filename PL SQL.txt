@@ -397,3 +397,163 @@ insert into conexiones(usuario, momento, evento)
 values(ora_login_user,systimestamp,ora_sysevent);
 end;
 /
+
+
+
+
+Arreglos PL/SQL
+
+Oracle proporciona una estructura de datos llamada varray
+
+DECLARE 
+TYPE ARREGLO_DE_NOMBRES IS VARRAY(5) OF VARCHAR2(10);
+TYPE RESULTADO IS VARRAY(5) OF INTEGER;
+NOMBRES ARREGLO_DE_NOMBRES;
+CAL RESULTADO;
+TOTAL INTEGER;
+BEGIN 
+NOMBRES:=ARREGLO_DE_NOMBRES('CARLOS','ZITA','MIRIAM','NATALIA','JESSY');
+CAL:=RESULTADO(10,9,7,8,6);
+TOTAL:=NOMBRES.COUNT;
+DBMS_OUTPUT.PUT_LINE('TOTAL'|| TOTAL ||'ALUMNOS');
+DBMS_OUTPUT.PUT_LINE('ALUMNO           CALIFICACION');
+FOR I IN 1 ..TOTAL LOOP
+DBMS_OUTPUT.PUT_LINE(NOMBRES(I) ||'---------------------->'||CAL(I));
+END LOOP;
+END;
+/
+
+DECLARE
+    TYPE l_tab2 IS VARRAY(5) OF VARCHAR2(20);
+    l_temp NUMBER;
+  BEGIN
+    /* set up the test data */
+    l_tab2(1) := '10';
+    l_tab2(2) := '15';
+    l_tab2(3) := '5';
+    l_tab2(4) := '20';
+    /* implement bubble sort */
+    for i in 1..l_tab2.COUNT-1
+    loop
+      for j in 2..l_tab2.COUNT
+      loop
+        if l_tab2(j) < l_tab2(j-1)
+        then
+          l_temp := l_tab2(j-1);
+          l_tab2(j-1) := l_tab2(j);
+          l_tab2(j) := l_temp;
+        END IF;
+      END LOOP;
+    END LOOP;
+    /* just to prove they are sorted (remove the reverse for ascending order) */
+    FOR i IN REVERSE 1..l_tab2.COUNT
+    LOOP
+      dbms_output.put_line(l_tab2(i));
+    END LOOP;
+ END;
+ /
+
+DECLARE 
+TYPE RESULTADO IS VARRAY(20) OF INTEGER;
+CAL RESULTADO;
+TOTAL INTEGER;
+BEGIN 
+CAL:=RESULTADO(9,10,8,9,2,1,10,20,30,40,10,20,50,20,30,40,90,40,50,10);
+ for i in 1..CAL.COUNT-1
+    loop
+      for j in 2..CAL.COUNT
+      loop
+        if CAL(j) < CAL(j-1)
+        then
+          TOTAL := CAL(j-1);
+          CAL(j-1) := CAL(j);
+          CAL(j) := TOTAL;
+        END IF;
+      END LOOP;
+    END LOOP;
+    /* just to prove they are sorted (remove the reverse for ascending order) */
+    FOR i IN REVERSE 1..CAL.COUNT
+    LOOP
+      dbms_output.put_line(CAL(i));
+    END LOOP;
+ END;
+ /
+
+DECLARE 
+CURSOR CURSOR_ESTUDIANTE IS
+SELECT NOMBRE FROM ESTUDIANTE;
+TYPE ARREGLO_ESTUDIANTE IS VARRAY(10) OF ESTUDIANTE.NOMBRE %TYPE;
+LISTA_DE_NOMBRES ARREGLO_ESTUDIANTE:=ARREGLO_ESTUDIANTE();
+CONTADOR INTEGER:=0;
+BEGIN
+FOR INICIO IN CURSOR_ESTUDIANTE LOOP
+CONTADOR:=CONTADOR + 1;
+LISTA_DE_NOMBRES.EXTEND;
+LISTA_DE_NOMBRES(CONTADOR):=INICIO.NOMBRE;
+DBMS_OUTPUT.PUT_LINE('ESTUDIANTE('||CONTADOR||':'||LISTA_DE_NOMBRES(CONTADOR));
+END LOOP;
+END;
+/
+
+CREATE OR REPLACE FUNCTION LEE_ID_MATERIA
+(V_ID_ESTUDIANTE IN ESTUDIANTE.ID_ESTUDIANTE%TYPE)
+RETURN VARCHAR2
+IS
+V_MATERIA ESTUDIANTE.ID_MATERIA%TYPE;
+BEGIN
+SELECT ID_MATERIA
+INTO V_MATERIA
+FROM ESTUDIANTE
+WHERE ID_ESTUDIANTE=V_ID_ESTUDIANTE;
+RETURN(V_MATERIA);
+END;
+/
+
+START LEE_ID_MATERIA
+
+VARIABLE G_MATERIA VARCHAR2(5)
+EXECUTE :G_MATERIA := LEE_ID_MATERIA('4019')
+PRINT G_MATERIA
+G_MATERIA
+
+Buscar ODBC y como conectarme al gestoy de la base de datos
+Orígenes de datos ODBC (64 bits)
+
+create or replace function calculadora(
+num1 number,
+num2 number,
+operador in varchar2)
+return number
+is 
+
+begin
+if operador='+'
+then return (num1 + num2);
+end if;
+
+if operador='-'
+then return (num1 - num2);
+end if;
+
+if operador='*'
+then return (num1 * num2);
+end if;
+
+if operador='/'
+then return (num1 / num2);
+end if;
+end;
+/
+
+--------------- ejecutar funcion calculadora -----------------
+
+variable res number; //se crea la variables antes de ejecutar
+execute :res:=calculadora(5,6,'/'); // Ejecutamos la funcion con los parametros.
+print res; // imprimimos la variable que se declaro al principio para poder ver el resultado.
+
+-------------- checando lo que muestran las funciones de caracteres.
+select chr(64) from dual;
+select chr(80)||chr(101)||chr(114)||chr(114)||chr(111)"Gato"from dual;
+select CONCAT(CONCAT('HOLA','LUIS'),'FELIPE') from dual;
+select INITCAP('mexico esta en fraude electora')"capitals" from dual;
+select power(2,2) "potencia"from dual;
