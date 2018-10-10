@@ -557,3 +557,194 @@ select chr(80)||chr(101)||chr(114)||chr(114)||chr(111)"Gato"from dual;
 select CONCAT(CONCAT('HOLA','LUIS'),'FELIPE') from dual;
 select INITCAP('mexico esta en fraude electora')"capitals" from dual;
 select power(2,2) "potencia"from dual;
+
+----------------Funciones SQL------------------------------
+
+SQL> SELECT * FROM DUAL;
+
+D
+-
+X
+
+SQL> DUMMY
+SP2-0042: unknown command "DUMMY" - rest of line ignored.
+SQL> DUMMY;
+SP2-0042: unknown command "DUMMY" - rest of line ignored.
+SQL> DESCRIBE DUAL;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ DUMMY                                              VARCHAR2(1)
+
+SQL> SELECT REPLACE ('JUAN','UA';'OH') FROM DUAL
+  2  ;
+SELECT REPLACE ('JUAN','UA';'OH') FROM DUAL
+                           *
+ERROR at line 1:
+ORA-00911: invalid character
+
+
+SQL> SELECT REPLACE ('JUAN','UA','OH') FROM DUAL;
+
+REPL
+----
+JOHN
+
+SQL> SELECT REPLACE ('JUAN','UA','OH') FROM AREA;
+SELECT REPLACE ('JUAN','UA','OH') FROM AREA
+                                       *
+ERROR at line 1:
+ORA-04044: procedure, function, package, or type is not allowed here
+
+
+SQL> SELECT REPLACE ('JUAN','UA','OH') FROM area;
+SELECT REPLACE ('JUAN','UA','OH') FROM area
+                                       *
+ERROR at line 1:
+ORA-04044: procedure, function, package, or type is not allowed here
+
+
+SQL> systimestamp
+SP2-0734: unknown command beginning "systimesta..." - rest of line ignored.
+SQL> SYSTIMESTAMP;
+SP2-0734: unknown command beginning "SYSTIMESTA..." - rest of line ignored.
+SQL> SELECT SYSTIMESTAMP FROM DUAL
+  2  ;
+
+SYSTIMESTAMP
+---------------------------------------------------------------------------
+25/09/18 09:46:10.744000 -05:00
+
+SQL> select chr(80)||chr(114)||chr(114)||chr(111)"Gato" from dual;
+
+Gato
+----
+Prro
+
+SQL> select initcap('universidad nacional autonoma de mexico')"Capitals" from dual;
+
+Capitals
+---------------------------------------
+Universidad Nacional Autonoma De Mexico
+
+SQL> Update estudiante set id_materia=REPLACE(Id_Materia,'M','F');
+
+9 rows updated.
+
+SQL> select ascii(id_materia) from estudiante;
+
+ASCII(ID_MATERIA)
+-----------------
+               70
+               70
+               73
+               70
+               67
+               73
+               70
+               70
+               73
+
+9 rows selected.
+
+set termout on;
+set serveroutput on;
+set ver off;
+declare	
+i number :=0;	
+numero number := 1;	
+type tabla is table of number index by binary_integer;	
+resto tabla;
+begin	
+dbms_output.put_line('Dame el numero:');	
+numero := '&numero';		
+while numero >= 2 
+loop	
+resto(i) := mod(numero,2);	
+numero := (numero- resto(i))/2;	
+i := i + 1;	
+end loop;	
+resto(i) := numero;	
+while i >= 0 loop	
+dbms_output.put(resto(i)||rpad('	',1));	
+i := i - 1;	
+end loop;	
+dbms_output.put_line ('	');
+end;
+/
+
+CREATE TABLE CUENTAS (ID_CUENTA NUMBER(2), BALANCE NUMBER);
+CREATE TABLE ACCION (ID_CUENTA NUMBER(2), TIPO_OPERACION VARCHAR2(1),
+NUEVO_VALOR NUMBER,ESTADO VARCHAR(40), FECHA DATE);
+
+CREATE PROCEDURE BATCH
+IS
+BEGIN
+	DECLARE
+		CURSOR c1 IS
+		SELECT ID_Cuenta, Tipo_operacion, Nuevo_Valor FROM Accion
+		ORDER BY FECHA
+			FOR UPDATE OF ESTADO;
+		BEGIN
+		FOR acct IN c1 LOOP
+			acct.Tipo_operacion:=upper(acct.Tipo_operacion);
+/*--------------------------*/
+/*Hace un UPDATE. Si la cuenta a actualizarse no existe*/
+/*Crea una nueva cuenta*/
+/*--------------------------*/
+IF acct.Tipo_operacion= "U" THEN
+UPDATE CUENTAS SET Balance = acct.NUEVO_VALOR
+WHERE ID_Cuenta = acct.ID_Cuenta;
+IF SQL%NOTFOUND THEN INSERT INTO CUENTAS
+VALUES (acct.ID_Cuenta, acct.NUEVO_VALOR);
+UPDATE ACCION SET ESTADO = 
+'Update: ID NO EXISTE, VALOR INSERTADO.'
+WHERE CURRENT OF c1;
+ELSE
+UPDATE ACCION SET ESTADO = 'Update: EXITOSO.'
+WHERE CURRENT OF c1;
+END IF;
+/*--------------------------*/
+/*Proceso INSERT. Si la cuenta ya existe*/
+/*Hacer un actualizacion de la cuenta*/
+/*--------------------------*/
+ELSEIF acct.Tipo_operacion= "I" THEN 
+BEGIN
+INSERT INTO CUENTAS
+VALUES (acct.ID_Cuenta,acct.NUEVO_VALOR);
+UPDATE ACCION set ESTADO = 'Insert:EXITOSO.'
+WHERE CURRENT OF c1;
+EXCEPTION
+WHEN DUP_VAL_ON_INDEX THEN-La cuenta ya existe
+UPDATE CUENTAS SET Balance = acct.NUEVO_VALOR
+WHERE ID_Cuenta = acct.ID_Cuenta;
+UPDATE ACCION SET ESTADO = 
+'Insert: Acct exist. Se actualizo.'
+WHERE CURRENT OF c1;
+END IF;
+/*--------------------------*/
+/*Proceso DELET. Si la cuenta ya existe*/
+/*Poner el estado. La cuenta no existe */
+/*--------------------------*/
+ELSEIF acct.Tipo_operacion = 'D' THEN
+DELETE FROM CUENTAS
+WHERE ID_Cuenta = acct.ID_Cuenta;
+IF SQL%NOTFOUND THEN
+UPDATE ACCION SET ESTADO = 'Delete: ID NO EXISTE.'
+WHERE CURRENT OF c1;
+ELSE
+UPDATE ACCION SET ESTADO = 'Delet:Exitoso.'
+WHERE CURRENT OF c1;
+END IF;
+/*--------------------------*/
+/*Invalido*/
+/*--------------------------*/
+ELSE
+UPDATE ACCION SET ESTADO = 
+'OPERACION INVALIDAD. NO SE HIZO NADA'
+WHERE CURRENT OF c1;
+END IF;
+END LOOP;
+COMMIT;
+END;
+END; 
+/
