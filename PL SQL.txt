@@ -687,64 +687,64 @@ BEGIN
 		BEGIN
 		FOR acct IN c1 LOOP
 			acct.Tipo_operacion:=upper(acct.Tipo_operacion);
-/*--------------------------*/
-/*Hace un UPDATE. Si la cuenta a actualizarse no existe*/
-/*Crea una nueva cuenta*/
-/*--------------------------*/
-IF acct.Tipo_operacion= "U" THEN
-UPDATE CUENTAS SET Balance = acct.NUEVO_VALOR
-WHERE ID_Cuenta = acct.ID_Cuenta;
-IF SQL%NOTFOUND THEN INSERT INTO CUENTAS
-VALUES (acct.ID_Cuenta, acct.NUEVO_VALOR);
-UPDATE ACCION SET ESTADO = 
-'Update: ID NO EXISTE, VALOR INSERTADO.'
-WHERE CURRENT OF c1;
-ELSE
-UPDATE ACCION SET ESTADO = 'Update: EXITOSO.'
-WHERE CURRENT OF c1;
-END IF;
-/*--------------------------*/
-/*Proceso INSERT. Si la cuenta ya existe*/
-/*Hacer un actualizacion de la cuenta*/
-/*--------------------------*/
-ELSEIF acct.Tipo_operacion= "I" THEN 
-BEGIN
-INSERT INTO CUENTAS
-VALUES (acct.ID_Cuenta,acct.NUEVO_VALOR);
-UPDATE ACCION set ESTADO = 'Insert:EXITOSO.'
-WHERE CURRENT OF c1;
-EXCEPTION
-WHEN DUP_VAL_ON_INDEX THEN-La cuenta ya existe
-UPDATE CUENTAS SET Balance = acct.NUEVO_VALOR
-WHERE ID_Cuenta = acct.ID_Cuenta;
-UPDATE ACCION SET ESTADO = 
-'Insert: Acct exist. Se actualizo.'
-WHERE CURRENT OF c1;
-END IF;
-/*--------------------------*/
-/*Proceso DELET. Si la cuenta ya existe*/
-/*Poner el estado. La cuenta no existe */
-/*--------------------------*/
-ELSEIF acct.Tipo_operacion = 'D' THEN
-DELETE FROM CUENTAS
-WHERE ID_Cuenta = acct.ID_Cuenta;
-IF SQL%NOTFOUND THEN
-UPDATE ACCION SET ESTADO = 'Delete: ID NO EXISTE.'
-WHERE CURRENT OF c1;
-ELSE
-UPDATE ACCION SET ESTADO = 'Delet:Exitoso.'
-WHERE CURRENT OF c1;
-END IF;
-/*--------------------------*/
-/*Invalido*/
-/*--------------------------*/
-ELSE
-UPDATE ACCION SET ESTADO = 
-'OPERACION INVALIDAD. NO SE HIZO NADA'
-WHERE CURRENT OF c1;
-END IF;
-END LOOP;
-COMMIT;
-END;
-END; 
+			/*--------------------------*/
+			/*Hace un UPDATE. Si la cuenta a actualizarse no existe*/
+			/*Crea una nueva cuenta*/
+			/*--------------------------*/
+			IF acct.Tipo_operacion= 'U' THEN
+				UPDATE CUENTAS SET Balance = acct.NUEVO_VALOR
+				WHERE ID_Cuenta = acct.ID_Cuenta;
+				IF SQL%NOTFOUND THEN INSERT INTO CUENTAS
+					VALUES (acct.ID_Cuenta, acct.NUEVO_VALOR);
+					UPDATE ACCION SET ESTADO = 
+						'Update: ID NO EXISTE, VALOR INSERTADO.'
+						WHERE CURRENT OF c1;
+					ELSE
+						UPDATE ACCION SET ESTADO = 'Update: EXITOSO.'
+						WHERE CURRENT OF c1;
+					END IF;
+					/*--------------------------*/
+					/*Proceso INSERT. Si la cuenta ya existe*/
+					/*Hacer un actualizacion de la cuenta*/
+					/*--------------------------*/
+					ELSIF acct.Tipo_operacion= 'I' THEN 
+					BEGIN
+						INSERT INTO CUENTAS
+						VALUES (acct.ID_Cuenta,acct.NUEVO_VALOR);
+							UPDATE ACCION set ESTADO = 'Insert:EXITOSO.'
+							WHERE CURRENT OF c1;
+					EXCEPTION
+						WHEN DUP_VAL_ON_INDEX THEN --La cuenta ya existe
+						UPDATE CUENTAS SET Balance = acct.NUEVO_VALOR
+						WHERE ID_Cuenta = acct.ID_Cuenta;
+							UPDATE ACCION SET ESTADO = 
+							'Insert: Acct exist. Se actualizo.'
+							WHERE CURRENT OF c1;
+					END;
+					/*--------------------------*/
+					/*Proceso DELET. Si la cuenta ya existe*/
+					/*Poner el estado. La cuenta no existe */
+					/*--------------------------*/
+					ELSIF acct.Tipo_operacion = 'D' THEN
+						DELETE FROM CUENTAS
+						WHERE ID_Cuenta = acct.ID_Cuenta;
+					IF SQL%NOTFOUND THEN
+						UPDATE ACCION SET ESTADO = 'Delete: ID NO EXISTE.'
+						WHERE CURRENT OF c1;
+					ELSE
+						UPDATE ACCION SET ESTADO = 'Delet:Exitoso.'
+						WHERE CURRENT OF c1;
+					END IF;
+					/*--------------------------*/
+					/*Invalido*/
+					/*--------------------------*/
+					ELSE
+					UPDATE ACCION SET ESTADO = 
+						'OPERACION INVALIDAD. NO SE HIZO NADA'
+						WHERE CURRENT OF c1;
+				END IF;
+				END LOOP;
+			COMMIT;
+		END;
+	END; 
 /
