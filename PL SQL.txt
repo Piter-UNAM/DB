@@ -1,3 +1,5 @@
+https://livesql.oracle.com/apex/f?p=590:1000:104197790813944::NO:::
+
 Transaccion de bases de datos
 Una transaccion es una unidad atomica de trabajo con respecto a la recuperaciion y
 consistencia de datos
