@@ -1,0 +1,15 @@
+PL/SQL SE COMPONE DE LOS SIGUIENTES ELEMENTOS:
+Bloques: Unidades básicas en la programación PL/SQL
+Unidades léxicas: secuencias de caracteres permitidos en PL/SQL que componen los programas.
+Tipos: elementos que pueden usarse en las columnas de la base de datos y definen la naturaleza de los datos permitidos en la base de datos y en el lenguaje PL/SQL. Los tipos de PL/SQL se definen en un paquete denominado STANDAR cuyos contenidos son accesibles desde cualquier bloque PL/SQL.
+Expresiones y operadores: elementos que permiten unir las variables PL/SQL. Los operadores definen cómo se asignan los valores a las variables y cómo se manipulan dichos valores. Una expresión es una secuencia de variables y literales separados por operadores. El valor de una expresión se determina a partir de los valores de las variables y literales que la componen, y de la definición de los operadores.
+Funciones: además de los tipos, el paquete STANDARD define las funciones predefinidas SQL y de conversión disponibles en PL/SQL.
+Estructuras de control PL/SQL: permiten controlar el comportamiento del bloque a medida que este se ejecuta e incluyen las órdenes condicionales y los bucles. Las estructuras de control combinadas con las variables dotan a PL/SQL de poder y flexibilidad.
+Registros: los registros de PL/SQL son similares a las estructuras del lenguaje C. Un registro proporciona un mecanismo para tratar con variables diferentes, pero relacionadas, como si fueran una unidad.
+Tablas y matrices: las tablas PL/SQL se asemejan a las matrices del lenguaje C. Sintácticamente se las trata de la misma forma que a las matrices, aunque su implementación es distinta. Para poder declarar una tabla en PL/SQL es necesario primero definir su tipo y luego una variable de dicho tipo.
+Cursores: dentro de PL/SQL la orden SELECT no debe devolver más de una fila, pero si es necesario que SELECT devuelva más de una fila hay que emplear un cursor para extraer individualmente cada fila.
+Procedimientos: estructuras de bloques que pueden ser almacenados en la base de datos para ser ejecutados cuando sea necesario.
+Paquetes: estructuras de bloques PL/SQL que proporcionan un mecanismo para extender en todo momento el propio lenguaje PL/SQL.
+Disparadores: estructuras de bloques que se ejecutan de forma implícita cada vez que tiene lugar el suceso de disparo. Los disparadores no admiten argumentos.
+
+
