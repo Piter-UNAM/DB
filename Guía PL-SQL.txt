@@ -13,3 +13,26 @@ Paquetes: estructuras de bloques PL/SQL que proporcionan un mecanismo para exten
 Disparadores: estructuras de bloques que se ejecutan de forma implícita cada vez que tiene lugar el suceso de disparo. Los disparadores no admiten argumentos.
 
 
+Bloques PL/SQL
+Los programas de PL/SQL están compuestos por bloques, que pueden estar situados uno détras de otro(estructura secuencial) o pueden estar uno dentro de otro(estructura anidada). Por tanto, el bloque es la unidad básica en PL/SQL.
+
+Los bloques tienen tres secciones diferenciadas:
+
+-Sección declarativa: se situán en ella las variables, cursores y tipos usados por el bloque
+-Sección ejecutables: se situan en ellas las órdenes SQL y las órdenes procedimentales que llevan a cabo el trabajo del bloque.
+-Sección de excepciones: se sitúa en ella código que no se ejecuta a menos que ocurra un error. Por esta razón, la sección de excepciones suele llamase también sección de tratamiento de errores
+
+La sintaxis de un programa PL/SQL será la siguiente:
+
+DECLARE
+/*Sección declarativa*/
+BEGIN
+/*Sección ejecutable*/
+EXCEPTION
+/*Sección de excepciones*/
+NED;
+/
+
+Cuando se trabaja en el ambiente SQL*PLUS es necesario acabar los programas con una barra inclinada (/).
+Las palabras DECLARE,BEGIN,EXCEPTION Y END delimitan cada una de las secciones.
+
