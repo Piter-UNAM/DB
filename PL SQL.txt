@@ -1,6 +1,17 @@
 https://livesql.oracle.com/apex/f?p=590:1000:104197790813944::NO:::
 https://www.thecrazyprogrammer.com/2017/09/plsql-online-compiler.html
 
+http://epnbdd-oracle.blogspot.com/2012/05/privilegios-y-usuarios-en-oracle.html
+http://dbagroup.cl/usuarios-y-privilegios-en-oracle/
+http://oracleparatodos1.blogspot.com/2014/06/oracle-12c-usuarios-roles-y-privilegios.html
+https://www.plsql.biz/2014/01/asignacion-de-permisos-ROLES-a-programas-PLSQL.html
+https://encodingthecode.wordpress.com/2012/12/24/crear-usuarios-y-roles-en-oracle/
+https://www.techonthenet.com/oracle/tablespaces/create_tablespace.php
+https://www.oracle.com/technetwork/pt/articles/database-performance/unlimited-tablespace-vs-resource-495876-ptb.html
+
+
+
+
 Transaccion de bases de datos
 Una transaccion es una unidad atomica de trabajo con respecto a la recuperaciion y
 consistencia de datos
@@ -778,7 +789,6 @@ SELECT seq_paginas.nextval FROM dual;
 SELECT seq_paginas.currval FROM dual;
 END AUTONUM;
 
-
 CREATE OR REPLACE TRIGGER AUTONUM
 BEFORE UPDATE 
 ON PAGINAS
@@ -787,3 +797,133 @@ BEGIN
 SELECT NOMBRE.nextval FROM dual;
 SELECT NOMBRE.currval FROM dual;
 END AUTONUM;
+
+
+CREATE OR REPLACE PACKAGE <nombre paquete>
+AS
+Declaracion de variables;
+Procedimientos;
+Funciones;
+Cursores;
+END <nombre paquete>;
+/
+
+CREATE OR REPLACE PACKAGE LEER_ALUMNO
+AS
+TYPE DATOS_ESTUDIANTE IS
+RECORD
+(
+NUMERO_ESTUDIANTE ESTUDIANTE.ID_ESTUDIANTE%TYPE,
+NOMBRE_ESTUDIANTE ESTUDIANTE.NOMBRE%TYPE,
+NUMERO_MATERIA ESTUDIANTE.ID_MATERIA%TYPE
+);
+PROCEDURE LEE_ESTUDIANTE(NUM_ALUM ESTUDIANTE.ID_ESTUDIANTE%TYPE);
+END LEER_ALUMNO;
+/
+
+CREATE OR REPLACE PACKAGE BODY LEER_ALUMNO
+AS
+DATOS_ALUMNO DATOS_ESTUDIANTE;
+PROCEDURE MUESTRA_ESTUDIANTE;
+PROCEDURE LEE_ESTUDIANTE(NUM_ALUM ESTUDIANTE.ID_ESTUDIANTE%TYPE)
+IS
+BEGIN
+SELECT ID_ESTUDIANTE,NOMBRE,ID_MATERIA
+INTO DATOS_ALUMNO
+FROM ESTUDIANTE
+WHERE ID_ESTUDIANTE=NUM_ALUM;
+MUESTRA_ESTUDIANTE;
+END;
+
+
+PROCEDURE MUESTRA_ESTUDIANTE
+IS
+BEGIN
+DBMS_OUTPUT.PUT_LINE(
+DATOS_ALUMNO.NUMERO_ESTUDIANTE||''||
+DATOS_ALUMNO.NOMBRE_ESTUDIANTE||''||
+DATOS_ALUMNO.NUMERO_MATERIA
+);
+END MUESTRA_ESTUDIANTE;
+END LEER_ALUMNO;
+/
+EXECUTE LEER_ALUMNO.LEE_ESTUDIANTE('2907');
+
+
+
+CREATE OR REPLACE PACKAGE PAQUETE IS
+	NUMBIN INT (10);
+	N1 NUMBER;
+	N2 NUMBER;
+	OPERACION VARCHAR (1);
+	RES NUMBER;
+	PROCEDURE BIN (NUMBIN INT);
+	PROCEDURE CALC(N1 NUMBER, N2 NUMBER, OPERACION VARCHAR);
+END PAQUETE;
+/
+
+CREATE OR REPLACE PACKAGE BODY PAQUETE IS
+	PROCEDURE BIN(NUMBIN INT) IS
+	BINARIOS VARCHAR2(64);
+	INV VARCHAR2(64);
+	DIVi INT;
+	RESI INT;
+	X INT;
+	BEGIN
+		divi := numbin;
+		WHILE divi >= 1 LOOP
+			resi := MOD(divi, 2);
+			divi := (divi / 2) - resi;
+			binarios := binarios || resi;
+		END LOOP;
+		x := LENGTH(binarios);
+		WHILE x >= 1 LOOP
+			inv := inv || SUBSTR(binarios, x , 1); 
+			x := x - 1;
+		END LOOP;
+		dbms_output.put_line('El numero '|| numbin || ' convertido a binario es: ' || inv);
+	END;	
+	PROCEDURE CALC(N1 NUMBER, N2 NUMBER, OPERACION VARCHAR) IS
+	RES NUMBER;
+	BEGIN
+		CASE OPERACION
+        	WHEN '+' THEN
+	            RES:= N1+N2;
+        	WHEN '-' THEN
+            	    RES:= N1-N2;
+        	WHEN '/' THEN
+            	    RES:= N1/N2;
+			WHEN '*' THEN
+            	    RES:= N1*N2;
+		END CASE;
+		dbms_output.put_line('El resultado de la operacion es: '|| RES );
+	END;
+END PAQUETE;
+/
+
+SELECT GRANTEE,
+	OWNER,
+	GRANTOR,
+	PRIVILEGE,
+	GRANTABLE
+	FROM USER_TAB_PRIVS
+	WHERE TABLE_NAME='ESTUDIANTE' and OWNER = 'USUARIO';
+
+CREATE ROLE Nombre_Role;
+CREATE ROLE SuperUsuario;
+GRANT INSERT(id_estudiante,nombre) ON Estudiante To usuario1,usuario2;
+REVOKE SELECT,INSERT ON ESTUDIANTE FROM usuario;
+
+
+CREATE ROLE ActualizarA;
+CREATE ROLE ActualizarC;
+GRANT SELECT,INSERT,UPDATE,DELETE ON MATERIA TO ActualizarA;SU
+GRANT SELECT,INSERT,UPDATE,DELETE ON CURSO TO ActualizarC;
+
+GRANT INSERT ON INSCRIPCION TO Usuario1;
+GRANT UPDATE(APELLIDO,NOMBRE) ON ESTUDIANTE TO Usuario1;
+GRANT SELECT ON INSCRIPCION TO Usuario2;
+GRANT UPDATE ON ESTUDIANTE TO Usuario2;
+
+https://www.youtube.com/watch?v=V4lKvLCcXfM
+
