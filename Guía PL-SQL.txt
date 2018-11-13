@@ -860,3 +860,88 @@ END;
 /*---------------------------------------------------------------------------------------*/
 
 Subprogramas: Procedimientos, funciones, paquetes y disparadores.
+
+
+Hasta ahora hemos estudiado bloques anónimos que se compilan cada vez que son ejecutados , que no se almacenan en la base de datos y que no pueden ser llamados directamente desde otros bloques PL/SQL. Pero existen otros bloques denominados bloques nominados que no tienen estas restricciones y que pueden ser almacenados en la base de datos para ser ejecutador posteriormente. Entre los bloques nominados son destacableslos procedimientos, las funciones, los paquetes y los disparadores. Los procedimientos y las funciones se denominan subprogramas.
+
+Procedimiento almacenado:
+Para crear un procedimiento almacenado se usa la sintaxis general siguiente:
+
+CREATE [OR REPLACE] PROCEDURE nombre_procedimiento
+[(argumento [{IN|OUT|IN OUT}] tipo,
+...
+(argumento [{IN|OUT|IN OUT}] tipo)] {IS|AS}
+cuerpo_procedimiento
+
+El nombre del procedimiento es nombre_procedimiento, agumento es el nombre de un parametro del procedimiento, tipo es el tipo de parametro asociado y cuerpo_procedimiento es el bloque PL/SQL que contiene el codigo del procedimiento.
+La clausula OR REPLACE da un mensaje de aviso si se va a crear un procedimiento que ya existe. Para cambar el codigo de un procedimiento es necesario eliminarlo y volver a crearlo. Los procedimientos pueden tener parametros reales (contienen los valores que se pasan al procedimientocuando éste es invocado y reciben los resultados del procedimiento cuando este termina) y parametros formales(meros contenedores para los valores de los parametros reales).
+
+Cuando se llama al procedimiento (con CALL) se asigna el valor de los parametros realos a los parametros formales, dentro del procedimiento se hace referecia a dischos valores mediante los parametros formales y cuando el procedimiento termine se asigna el valor de los parametros formales a los parametros reales.
+
+Los parametros formales pueden tener los modos IN(por defecto), OUT o IN OUT. El modo IN indica que el parametro real se pasa al procedimiento cuando este es invocado, dentro del procedimiento el parametro formal se considera como de solo lectura(no puede ser cambiado) y cuando termina el procedimiento el parametro real no sufre cambios. El modo OUT indica que se ignora cualquier valor que tenga el parametro real cuando se llama al procedimiento, dentro del procedimiento el parametro real se considera como de solo escritura(no puede ser leido pero si es posible asignarle valores) y cuando finaliza el procedimiento los contenidos del parametro formal pasan al parametro real. El modo IN OUT indica que el parametro real se pasa al procedimiento cuando este es invocado, dentro del procedimiento el parametro formal puede ser de lectura y escritura, y cuando el procedimiento termina, los contenidos del parametro formal se asignal al parametro real.
+
+El cuerpo de un procedimiento es un bloque PL/SQL con sus secciones declarativa, ejecutable, y de manejo de excepciones. La seccion declarativa se situa entre las palabras clave IS o AS y la palabra clave BEGIN, la ejecutable entre BEGIN y EXCEPTION y la de excepciones entre EXCEPTION y END(no existe la palabra clave DECLARE en un procedimiento y su lugar lo ocupan IS o AS). A veces, se suele incluir el nombre del propio procedimiento despes de la orden END que cierra la declaración.
+Los parametros formales de un procedimiento pueden tener valores predeterminados que se declaran mediante la siguiente sintaxis:
+
+nombre_parametro[modo] tipo_parametro{:=\DEFAULT} valor inicial
+
+Ejemplo
+
+CREATE OR REPLAE PROCEDURE AñadeNuevoEstudiante(
+p_Nombre estudiantes.nombre%TYPE,
+p_Apellido estudiantes.apellido%TYPE,
+p_Especialidad estudiantes.especialidad%TYPE) AS
+BEGIN
+--Inserta una nueva fila en la tabla estudiantes,
+--Usa secuencia para generar un nuevo ID de estudiante y
+--Asigna el valor cero a creditos
+INSERT INTO estudiantes (ID, nombre, apellido, especialidad, creditos) 
+VALUES(secuencia.netxval,p_Nnmbre, p_Apellido, p_Especialidad, 0);
+COMMIT;
+END AñadeNuevoEstudiante;
+/
+
+Para invocar se usa: 
+SET SERVEROUTPUT ON;
+EXCECUTE AñadeNuevoEstudiante(parametro1,parametro2,parametro3);
+
+o
+
+BEGIN
+AñadeNuevoEstudiante(parametro1,parametro2,parametro3);
+END;
+/
+
+Tambien pueden definirse en el bloque PL/SQL parametros reales para pasar al procedimiento tal y como se observa en el sig ejemplo:
+DECLARE
+--Variables que describen al nuevo estudiantes
+v_NuevoNombre estudiantes.nombre%TYPE := 'Margaret';
+v_NuevoApellido estudiantes.apellido%TYPE := 'Mason';
+v_NuevaEspecialidad estudiantes.especialidad%TYPE := 'History';
+BEGIN
+--Añadir margaret mason a la base de datos
+AñadeNueboEstudiante(v_NuevoNombre,v_NuevoApellido,v_NuevaEspecialidad);
+END;
+/
+
+Ejemplo sobre IN, OUT e IN OUT
+
+CREATE OR REPLACE PROCEDURE ModeTest(
+p_InParameter IN NUMBER,
+p_OutParameter OUT NUMBER,
+p_InOutParameter IN OUT NUMBER) IS
+v_LocalVariable NUMBER;
+BEGIN
+/*Asigna p_InParameter a v_LocalVariable.Esto es legal, porque leemos desde un parametro IN y no se escribe en el*/
+v_LocalVariable:=p_InParameter; --Legal
+
+/*Asigna 7 a p_OutParameter. Esto es lega, ya que se escribe en un parametro OUT y no se lee de el*/
+p_OutParameter := 7; --Legal
+
+/*Agina p_InOutParameter a v_LocalVariable.Esto es legar, ya que se lee de un parametro IN OUT*/
+v_LovalVariable:= p_InOutParameter; --Legal
+
+/*Asigna 7 a p_InOutParameter.Esto es legal, ya que se lee de un parametro IN OUT*/
+p_InOutParameter:=7; --Legal
+END ModeTest;
+/
