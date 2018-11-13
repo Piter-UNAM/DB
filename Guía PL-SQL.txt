@@ -1,55 +1,50 @@
 Guía de PL/SQL
 
-/*---------------------------------------------------------------------------------------*/
-PL/SQL SE COMPONE DE LOS SIGUIENTES ELEMENTOS:
-Bloques: Unidades básicas en la programación PL/SQL
-Unidades léxicas: secuencias de caracteres permitidos en PL/SQL que componen los programas.
-Tipos: elementos que pueden usarse en las columnas de la base de datos y definen la naturaleza de los datos permitidos en la base de datos y en el lenguaje PL/SQL. Los tipos de PL/SQL se definen en un paquete denominado STANDAR cuyos contenidos son accesibles desde cualquier bloque PL/SQL.
-Expresiones y operadores: elementos que permiten unir las variables PL/SQL. Los operadores definen cómo se asignan los valores a las variables y cómo se manipulan dichos valores. Una expresión es una secuencia de variables y literales separados por operadores. El valor de una expresión se determina a partir de los valores de las variables y literales que la componen, y de la definición de los operadores.
-Funciones: además de los tipos, el paquete STANDARD define las funciones predefinidas SQL y de conversión disponibles en PL/SQL.
-Estructuras de control PL/SQL: permiten controlar el comportamiento del bloque a medida que este se ejecuta e incluyen las órdenes condicionales y los bucles. Las estructuras de control combinadas con las variables dotan a PL/SQL de poder y flexibilidad.
-Registros: los registros de PL/SQL son similares a las estructuras del lenguaje C. Un registro proporciona un mecanismo para tratar con variables diferentes, pero relacionadas, como si fueran una unidad.
-Tablas y matrices: las tablas PL/SQL se asemejan a las matrices del lenguaje C. Sintácticamente se las trata de la misma forma que a las matrices, aunque su implementación es distinta. Para poder declarar una tabla en PL/SQL es necesario primero definir su tipo y luego una variable de dicho tipo.
-Cursores: dentro de PL/SQL la orden SELECT no debe devolver más de una fila, pero si es necesario que SELECT devuelva más de una fila hay que emplear un cursor para extraer individualmente cada fila.
-Procedimientos: estructuras de bloques que pueden ser almacenados en la base de datos para ser ejecutados cuando sea necesario.
-Paquetes: estructuras de bloques PL/SQL que proporcionan un mecanismo para extender en todo momento el propio lenguaje PL/SQL.
-Disparadores: estructuras de bloques que se ejecutan de forma implícita cada vez que tiene lugar el suceso de disparo. Los disparadores no admiten argumentos.
-
-/*---------------------------------------------------------------------------------------*/
-
-Bloques PL/SQL
-Los programas de PL/SQL están compuestos por bloques, que pueden estar situados uno detrás de otro(estructura secuencial) o pueden estar uno dentro de otro(estructura anidada). Por tanto, el bloque es la unidad básica en PL/SQL.
-
-Los bloques tienen tres secciones diferenciadas:
-
--Sección declarativa: se sitúan en ella las variables, cursores y tipos usados por el bloque
--Sección ejecutables: se sitúan en ellas las órdenes SQL y las órdenes procedimentales que llevan a cabo el trabajo del bloque.
--Sección de excepciones: se sitúa en ella código que no se ejecuta a menos que ocurra un error. Por esta razón, la sección de excepciones suele llamase también sección de tratamiento de errores
-
-La sintaxis de un programa PL/SQL será la siguiente:
-
-DECLARE
-/*Sección declarativa*/
-BEGIN
-/*Sección ejecutable*/
-EXCEPTION
-/*Sección de excepciones*/
-NED;
-/
-
-Cuando se trabaja en el ambiente SQL*PLUS es necesario acabar los programas con una barra inclinada (/).
-Las palabras DECLARE,BEGIN,EXCEPTION Y END delimitan cada una de las secciones.
-
-La única sección indispensable en un bloque es la sección ejecutable, siendo las otras dos opcionales. Si falta la sección de excepciones, no aparecerá la palabra clave EXCEPTION, y el bloque terminará con la palabra clave END, seguida de un punto y coma. Por tanto, un programa mínimo, es decir, un programa PL/SQL con sólo la sección ejecutable, tiene la siguiente estructura:
-
-BEGIN
-/*Sección ejecutable*/
-END;
-/
-
-/*---------------------------------------------------------------------------------------*/
-
 Creación de base de datos para trabajar los futuros ejemplos:
+
+CREATE TABLE estudiantes(
+id NUMBER(5) PRIMARY KEY,
+nombre CHAR(20),
+apellido CHAR(20),
+especialidad CHAR(20),
+creditos NUMBER
+);
+
+CREATE TABLE aulas(
+idaula NUMBER(5) PRIMARY KEY,
+edificio CHAR(15),
+numeroaula NUMBER,
+numeroasientos NUMBER,
+descripcionaula CHAR(50)
+);
+
+CREATE TABLE especialidades(
+especialidad CHAR(30),
+totalcreditos NUMBER,
+totalestudiantes NUMBER
+);
+
+CREATE TABLE cursos(
+departamento CHAR(3),
+ncurso NUMBER,
+descripcioncurso CHAR(200),
+cupoestudiantes NUMBER,
+nestudiantes NUMBER,
+ncreditos NUMBER,
+idaula NUMBER,
+CONSTRAINT cursos_departamento_curso PRIMARY KEY(departamento, ncurso),
+CONSTRAINT cursos_idaula FOREIGN KEY(idaula) REFERENCES aulas(idaula)
+);
+
+CREATE TABLE estudios(
+idestudiante NUMBER NOT NULL,
+departamento CHAR(3) NOT NULL,
+Ncurso NUMBER NOT NULL,
+grado CHAR(1),
+CONSTRAINT estudios_grado CHECK(grado IN('A','B','C','D','E')),
+CONSTRAINT estudios_idestudiante FOREIGN KEY (idestudiante) REFERENCES estudiantes(id),
+CONSTRAINT estudios_departamento_ncurso FOREIGN KEY (departamento, ncurso) REFERENCES cursos (departamento, ncurso)
+);
 
 CREATE TABLE clientes(
 Num_clie integer not null PRIMARY KEY,
@@ -82,7 +77,7 @@ Ventas number not null
 CREATE TABLE productos(
 Id_fab char(3) not null,
 Id_producto char(5) not null,
-Descripción char(20) not null,
+Descripcion char(20) not null,
 Precio number not null,
 Existencias integer not null,
 CONSTRAINT productos_Id_fab_Id_producto 
@@ -100,7 +95,86 @@ Cant integer not null,
 Importe number not null
 );
 
+CREATE TABLE dept( /*departamentos*/
+deptno NUMBER(2) CONSTRAINT pk_dept PRIMARY KEY, /*numero de departamento*/
+dname VARCHAR2(14), /*nombre del departamento*/
+loc VARCHAR2(12) /*localidad del departamento*/
+);
+
+CREATE TABLE emp( /*empleados*/
+empno NUMBER(4) CONSTRAINT pk_emp PRIMARY KEY, /*numerode empleado*/
+ename VARCHAR2(10), /*nombre del empleado*/
+job VARCHAR2(9), /*trabajo del empleado*/
+mgr NUMBER(4), /*codigo del oficio*/
+hiredate DATE, /*fecha de contrato*/
+sal NUMBER(7,2), /*salario*/
+comm NUMBER(7,2), /*comision*/
+deptno NUMBER(2) CONSTRAINT fk_deptno REFERENCES dept
+);
+
+CREATE TABLE bonus( /*bonificaciones a empleados*/
+ename VARCHAR2(10), /*nombre del empleado*/
+job VARCHAR2(9), /*trabajo del empleado*/
+sal NUMBER, /*salario del empleado*/
+comm NUMBER
+);
+CREATE TABLE salgrade( /*nivel salarial de empleados*/
+grade NUMBER, /*nivel de salario*/
+losal NUMBER, /*salario máximo*/
+hisal NUMBER /*salario mínimo*/
+);
+
 Datos para insertar en las distintas tablas anteriormente creadas
+
+INSERT INTO estudiantes VALUES(1,'Scott','Smith','Computer Science',0);
+INSERT INTO estudiantes VALUES(2,'Margaret','Mason','History',0);
+INSERT INTO estudiantes VALUES(3,'Joanne','Junebug','Computer Science',0);
+INSERT INTO estudiantes VALUES(4,'Manish','Murgratroid','Economics',0);
+INSERT INTO estudiantes VALUES(5,'Patrick','Poll','History',0);
+INSERT INTO estudiantes VALUES(6,'Timothy','Taller','Hhistory',0);
+INSERT INTO estudiantes VALUES(7,'Barbara','Blues',Economics',0);
+INSERT INTO estudiantes VALUES(8,'David','Dinsmore','Music',0);
+INSERT INTO estudiantes VALUES(9,'Ester','Elegant','Nutrition',0);
+INSERT INTO estudiantes VALUES(10,'Rose','Riznit','Music',0);
+INSERT INTO estudiantes VALUES(11,'Rita','Razmataz','Nutrition',0);
+
+INSERT INTO aulas VALUES(99999,'Building 7',310,1000,'Large Lecture Hall');
+INSERT INTO aulas VALUES(99998,'Building 6',101,500,'Small Lecture Hall');
+INSERT INTO aulas VALUES(99997,'Building 6',150,50,'Discussion Room A');
+INSERT INTO aulas VALUES(99996,'Building 6',160,50,'Discussion Room B');
+INSERT INTO aulas VALUES(99995,'Building 6',170,50,'Discussion Room C');
+INSERT INTO aulas VALUES(99994,'Music Building',100,10,'Music Practice Room');
+INSERT INTO aulas VALUES(99993,'Music Building',200,1000,'Concert Room');
+INSERT INTO aulas VALUES(99992,'Building 7',300,75,'Discussion Room D');
+INSERT INTO aulas VALUES(99991,'Building 7',310,50,'Discussion Room E');
+
+INSERT INTO cursos VALUES('HIS',101,'History 101',30,0,4,99999);
+INSERT INTO cursos VALUES('HIS',301,'History 301',30,0,4,99995);
+INSERT INTO cursos VALUES('CS',101,'Computer Science 101',50,0,4,99998);
+INSERT INTO cursos VALUES('ECN',203,'Economics 203',15,0,3,99997);
+INSERT INTO cursos VALUES('CS',102,'Computer Science 102',35,0,4,99996);
+INSERT INTO cursos VALUES('MUS',410,'Music 410',5,0,3,99994);
+INSERT INTO cursos VALUES('ECN',101,'Economics 101',50,0,4,99992);
+INSERT INTO cursos VALUES('NUT',307,'Nutrition 307',20,0,4,99991);
+
+INSERT INTO estudios VALUES(1,'CS',102,'A');
+INSERT INTO estudios VALUES(3,'CS',102,'B');
+INSERT INTO estudios VALUES(4,'CS',102,'C');
+INSERT INTO estudios VALUES(1,'HIS',101,'A');
+INSERT INTO estudios VALUES(2,'HIS',101,'B');
+INSERT INTO estudios VALUES(3,'HIS',101,'B');
+INSERT INTO estudios VALUES(4,'HIS',101,'A');
+INSERT INTO estudios VALUES(5,'HIS',101,'C');
+INSERT INTO estudios VALUES(6,'HIS',101,'C');
+INSERT INTO estudios VALUES(7,'HIS',101,'E');
+INSERT INTO estudios VALUES(8,'HIS',101,'B');
+INSERT INTO estudios VALUES(9,'HIS',101,'A');
+INSERT INTO estudios VALUES(10,'HIS',101,'D');
+INSERT INTO estudios VALUES(11,'HIS',101,'A');
+INSERT INTO estudios VALUES(9,'NUT',307,'A');
+INSERT INTO estudios VALUES(11,'NUT',307,'A');
+INSERT INTO estudios VALUES(10,'MUS',410,'B');
+INSERT INTO estudios VALUES(7,'MUS',410,'E');
 
 INSERT INTO clientes VALUES (2101,'Jones Mfg.',106,65000);
 INSERT INTO clientes VALUES (2102,'First. Corp.',101,65000);
@@ -199,10 +273,86 @@ INSERT INTO pedidos VALUES(113062,'24-02-1990',2124,110,'FEA','114',9,2430);
 INSERT INTO pedidos VALUES(113065,'27-02-1990',2106,110,'QSA','XK47',9,2130);
 INSERT INTO pedidos VALUES(113069,'02-04-1990',2109,110,'IMM','775C',9,31350);
 
-CREATE TABLE dept(
-deptno NUMBER(2) CONSTRAINT pk_dept PRIMARY KEY,
-dname VARCHAR2(14),
-);
+
+/*---------------------------------------------------------------------------------------*/
+Algunos comandos utiles para usar en PL/SQL
+DESCRIBE : muestra los datos/variables que se estan manejando en una tabla
+
+SQL> DESCRIBE CLIENTES;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ NUM_CLIE                                  NOT NULL NUMBER(38)
+ EMPRESA                                   NOT NULL CHAR(20)
+ REPCLIE                                            NUMBER(38)
+ LIMITE_CREDITO                                     NUMBER(38)
+
+SELECT: obtiene los datos guardados en una tabla
+
+SQL> select * from clientes;
+
+  NUM_CLIE EMPRESA                 REPCLIE LIMITE_CREDITO
+---------- -------------------- ---------- --------------
+      2101 Jones Mfg.                  106          65000
+      2102 First. Corp.                101          65000
+      2103 Acme Mfg.                   105          50000
+      2105 AAA Investments             101          45000
+      2106 Fred Lewis Crop.            102          65000
+      2107 Ace International           110          35000
+      2108 Holm Landis                 109          55000
+      2109 Chen associates             103          25000
+      2111 JCP Inc.                    103          50000
+      2112 Zetacorp                    108          50000
+      2113 Ian Schmidt                 104          20000
+
+SAVE: Guardar en fichero la sintaxis del comando actual (SAVE nombre_fichero)
+GET: sirve para editar un nuevo fichero almacenado previamente ()
+/*---------------------------------------------------------------------------------------*/
+
+PL/SQL SE COMPONE DE LOS SIGUIENTES ELEMENTOS:
+Bloques: Unidades básicas en la programación PL/SQL
+Unidades léxicas: secuencias de caracteres permitidos en PL/SQL que componen los programas.
+Tipos: elementos que pueden usarse en las columnas de la base de datos y definen la naturaleza de los datos permitidos en la base de datos y en el lenguaje PL/SQL. Los tipos de PL/SQL se definen en un paquete denominado STANDAR cuyos contenidos son accesibles desde cualquier bloque PL/SQL.
+Expresiones y operadores: elementos que permiten unir las variables PL/SQL. Los operadores definen cómo se asignan los valores a las variables y cómo se manipulan dichos valores. Una expresión es una secuencia de variables y literales separados por operadores. El valor de una expresión se determina a partir de los valores de las variables y literales que la componen, y de la definición de los operadores.
+Funciones: además de los tipos, el paquete STANDARD define las funciones predefinidas SQL y de conversión disponibles en PL/SQL.
+Estructuras de control PL/SQL: permiten controlar el comportamiento del bloque a medida que este se ejecuta e incluyen las órdenes condicionales y los bucles. Las estructuras de control combinadas con las variables dotan a PL/SQL de poder y flexibilidad.
+Registros: los registros de PL/SQL son similares a las estructuras del lenguaje C. Un registro proporciona un mecanismo para tratar con variables diferentes, pero relacionadas, como si fueran una unidad.
+Tablas y matrices: las tablas PL/SQL se asemejan a las matrices del lenguaje C. Sintácticamente se las trata de la misma forma que a las matrices, aunque su implementación es distinta. Para poder declarar una tabla en PL/SQL es necesario primero definir su tipo y luego una variable de dicho tipo.
+Cursores: dentro de PL/SQL la orden SELECT no debe devolver más de una fila, pero si es necesario que SELECT devuelva más de una fila hay que emplear un cursor para extraer individualmente cada fila.
+Procedimientos: estructuras de bloques que pueden ser almacenados en la base de datos para ser ejecutados cuando sea necesario.
+Paquetes: estructuras de bloques PL/SQL que proporcionan un mecanismo para extender en todo momento el propio lenguaje PL/SQL.
+Disparadores: estructuras de bloques que se ejecutan de forma implícita cada vez que tiene lugar el suceso de disparo. Los disparadores no admiten argumentos.
+
+/*---------------------------------------------------------------------------------------*/
+
+Bloques PL/SQL
+Los programas de PL/SQL están compuestos por bloques, que pueden estar situados uno detrás de otro(estructura secuencial) o pueden estar uno dentro de otro(estructura anidada). Por tanto, el bloque es la unidad básica en PL/SQL.
+
+Los bloques tienen tres secciones diferenciadas:
+
+-Sección declarativa: se sitúan en ella las variables, cursores y tipos usados por el bloque
+-Sección ejecutables: se sitúan en ellas las órdenes SQL y las órdenes procedimentales que llevan a cabo el trabajo del bloque.
+-Sección de excepciones: se sitúa en ella código que no se ejecuta a menos que ocurra un error. Por esta razón, la sección de excepciones suele llamase también sección de tratamiento de errores
+
+La sintaxis de un programa PL/SQL será la siguiente:
+
+DECLARE
+/*Sección declarativa*/
+BEGIN
+/*Sección ejecutable*/
+EXCEPTION
+/*Sección de excepciones*/
+NED;
+/
+
+Cuando se trabaja en el ambiente SQL*PLUS es necesario acabar los programas con una barra inclinada (/).
+Las palabras DECLARE,BEGIN,EXCEPTION Y END delimitan cada una de las secciones.
+
+La única sección indispensable en un bloque es la sección ejecutable, siendo las otras dos opcionales. Si falta la sección de excepciones, no aparecerá la palabra clave EXCEPTION, y el bloque terminará con la palabra clave END, seguida de un punto y coma. Por tanto, un programa mínimo, es decir, un programa PL/SQL con sólo la sección ejecutable, tiene la siguiente estructura:
+
+BEGIN
+/*Sección ejecutable*/
+END;
+/
 
 /*---------------------------------------------------------------------------------------*/
 
@@ -225,3 +375,488 @@ VALUES (secuencia.NEXTVAL, v_Nombre, v_Apellido, v_NuevaEspecialidad);
 END IF;
 END;
 /
+
+/*---------------------------------------------------------------------------------------*/
+
+Existen varios tipos de bloques
+Los bloques anonimos: son aquellos bloques que se ejecutan una sola vez y que por regla general se construyen de manera dinámica.
+Los bloques nominados: no son mas que bloques anónimos con una etiqueta que le da al bloque un nombre. Al igual que los bloques anónimos, se ejecutan una sola vez y suelen construirse de manera dinámica.
+Subprogramas: Son procedimientos,paquetes y funciones almacenados en la base de datos. Estos blques suelen ejecutarse múltiples veces mediante una llamada al procedimiento, paquete o funcion que los constityuen.
+Disparadores o triggers: son bloques nominados que se almacenan en la base de datos y que se ejecutan de manera implicita cada vez que tiene lugar un suceso de disparo. El suceso de disparo es una orden SQL del lenguaje DML de manipulación de datos que se ejecuta sobre una tabla de la base de datos.
+
+Ejemplo de un bloque PL/SQL anónimo
+DECLARE 
+/*Declara las variables a utilizar en el bloque*/
+v_Num1	NUMBER :=1;
+V_Num2 NUMBER :=2;
+v_String1 VARCHAR2(50) :="Hola!";
+v_String2 VARCHAR2(50) :="-Mensaje en PL/SQL";
+v_OutPutStr VARCHAR2(50);
+BEGIN
+/*Primero, insertamos dos filas en la tabla temporal, usando los valores de las variables.*/
+INSERT INTO temporal (columnanumerica,columnacaracter) values (v_Num1,v_String1);
+INSERT INTO temporal (columnanumerica,columnacaracter) values (v_Num2,v_String2);
+/*Ahora consultamos la tabla temporal para ver las 2 filas recien insertadas, presentando en la pantalla utilizando el paquete DBMS_OUTPUT*/
+SELECT columnacaracter INTO v_OutputStr FROM temporal WHERE columnanumerica= v_Num1;
+DBMS_OUTPUT(v_OutputStr);
+SELECT columnacaracter INTO v_OutputStr FROM temporal WHERE columnanumerica= v_Num2;
+DBMS_OUTPUT(v_OutputStr);
+END;
+/
+El bloque anónimo anterior puede convertirse en bloque nominado situando una etiqueta inmediatamente antes de la palabra clave DECLARE. La etiqueta también puede aparecer después de la palabra clave END tal y como se indica en el programa siguiente :
+DECLARE 
+/*Declara las variables a utilizar en el bloque*/
+v_Num1	NUMBER :=1;
+V_Num2 NUMBER :=2;
+v_String1 VARCHAR2(50) :="Hola!";
+v_String2 VARCHAR2(50) :="-Mensaje en PL/SQL";
+v_OutPutStr VARCHAR2(50);
+BEGIN
+/*Primero, insertamos dos filas en la tabla temporal, usando los valores de las variables.*/
+INSERT INTO temporal (columnanumerica,columnacaracter) values (v_Num1,v_String1);
+INSERT INTO temporal (columnanumerica,columnacaracter) values (v_Num2,v_String2);
+/*Ahora consultamos la tabla temporal para ver las 2 filas recien insertadas, presentando en la pantalla utilizando el paquete DBMS_OUTPUT*/
+SELECT columnacaracter INTO v_OutputStr FROM temporal WHERE columnanumerica= v_Num1;
+DBMS_OUTPUT(v_OutputStr);
+SELECT columnacaracter INTO v_OutputStr FROM temporal WHERE columnanumerica= v_Num2;
+DBMS_OUTPUT(v_OutputStr);
+END "INSERTAR_EN_TEMPORAL";
+/
+
+El bloque nominado anterior puede convertirse en subprograma transformándolo en procedimiento almacenado mediante el cambio de la palabra clave DECLARE por las palabras clave CREATE OR REPLACE PROCEDURE y situando el nombre del procedimiento despues de la palabra clave END.
+
+CREATE OR REPLACE PROCEDURE insertar_en_temporal AS 
+/*Declara las variables a utilizar en el bloque*/
+v_Num1	NUMBER :=1;
+V_Num2 NUMBER :=2;
+v_String1 VARCHAR2(50) :="Hola!";
+v_String2 VARCHAR2(50) :="-Mensaje en PL/SQL";
+v_OutPutStr VARCHAR2(50);
+BEGIN
+/*Primero, insertamos dos filas en la tabla temporal, usando los valores de las variables.*/
+INSERT INTO temporal (columnanumerica,columnacaracter) values (v_Num1,v_String1);
+INSERT INTO temporal (columnanumerica,columnacaracter) values (v_Num2,v_String2);
+/*Ahora consultamos la tabla temporal para ver las 2 filas recien insertadas, presentando en la pantalla utilizando el paquete DBMS_OUTPUT*/
+SELECT columnacaracter INTO v_OutputStr FROM temporal WHERE columnanumerica= v_Num1;
+DBMS_OUTPUT(v_OutputStr);
+SELECT columnacaracter INTO v_OutputStr FROM temporal WHERE columnanumerica= v_Num2;
+DBMS_OUTPUT(v_OutputStr);
+END insertar_en_temporal;
+/
+
+Ejemplo de estructura de disparador(Trigger):
+CREATE OR REPLACE TRIGGER SoloPositivos
+BEFORE INSERT OR UPDATE OF columnanumerica 
+ON temporal
+FOR EACH ROW
+BEGIN
+IF :new.columnanumerica<0 THEN
+RAISE_APPLICATION_ERROR(-20100,'Por favor, inserte un valor positivo');
+END IF;
+END SoloPositivios;
+/
+
+
+/*---------------------------------------------------------------------------------------*/
+
+Literales:
+Numericos: Valores enteros o reales(opcionalmente precedidos por el signo más o menos)asignables a una variable de tipo NUMBER sin realizar conversiones.
+Booleanos: TRUE, FALSE Y NULL
+Caracter o cadena: uno o más caracteres delimitados por comillas simples y asignables a variables e tipo CHAR o VARCHAR2 sin realizar conversiones.
+
+Comentarios:
+--Para hacer comentarios en una solo linea
+/*Para hacer comentarios multilinea*/
+
+/*---------------------------------------------------------------------------------------*/
+
+Estructuras de control
+
+Las estructuras de control permiten controlas el comportamiento del bloque a medida que éste se ejecuta. Las más importantes son las estructuras condicionles y los bucles.
+
+Estructuras condicionales
+Se utilizan para la relación de acciones dependiendo del cumplimiento o no de determinadas condiciones.  Las estructuras condicionales más comunes son IF-THEN, IF-THEN-ELSE, IF-THEN-ELSIF Y CASE.
+
+IF-THEN
+Se trata de una estructura condicional en la que se ejecuta una secuencia de instrucciones si la condicion es cierta. Su sintaxis es la siguiente:
+
+IF condicion THEN
+Secuencia_de_instrucciones
+END IF;
+
+Ejemplo:
+IF ventas > cota then
+compute_bonus(empid);
+UPDATE payroll SET pay= pay+bonus WHERE empno = emp_id;
+END IF;
+Se puede escribir todo en una sola fila
+IF x > y THEN high := x; END IF;
+
+IF-THEN-ELSE
+Se trata de una estructura condicional en la que se ejecuta una primera secuencia de instrucciones si la condicion es cierta, y se ejecuta una segunda secuencia de instrucciones si la condicion es falsa. Su sintaxis es la siguiente:
+IF condicion THEN 
+secuencia_de_instrucciones;
+ELSE
+secuencia_de_instrucciones;
+END IF;
+
+Ejemplo:
+
+IF trans_type = 'CR' THEN
+UPDATE accounts SET balance = balance + credit WHERE ...
+ELSE
+UPDATE accounts SET balance = balance - debit WHERE ...
+END IF;
+
+Estas estructuras condicionales pueden anidarse tal y como se inidica en el siguiente ejemplo:
+
+IF trans_type = 'CR' THEN
+UPDATE accounts SET balance = balance + credit WHERE ...
+ESLSE
+	IF new_balance >= minimum_balance THEN
+	UPDATE accounts SET balance = balance - debit WHERE ...
+	ELSE
+	RAISE insufficient_funds;
+	END IF;
+END IF;
+
+IF-THEN-ELSIF
+Estructura condicional que se utiliza para seleccionar una acción entre varias alternativas mutuamente excluyentes. Si la primera condición es falsa o nula, se pasa a testear la condición de la cláusula ELSIF comenzando una nueva estructura condicional IF-THEN-ELSE. Su sintaxis es la siguiente: 
+
+IF condicion THEN
+secuencia_de_instrucciones;
+ELSIF condicion2 THEN
+secuencia_de_instrucciones;
+ELSE
+secuencia_de_instrucciones;
+END IF;
+
+Ejemplo:
+BEGIN
+...
+IF ventas > 50000 THEN
+bonus := 1500;
+ELSIF ventas > 35000 THEN
+bonus := 500;
+ELSE
+bonus := 100;
+END IF;
+INSERT INTO payroll VALUES (emp_id,bonus,...);
+END;
+
+CASE 
+Al igual que IF, la sentencia CASE selecciona una secuencia de sentencias a ejecutar, sin embargo, para realizar la seleccion utiliza un selector y no una expresión booleana. Para ver la diferencia entre IF y CASE presentamos el mismo ejemplo con las dos sintaxis. Con IF tenemos el siguiente codigo:
+
+IF grade = 'A' THEN
+	DBMS_OUTPUT.PUT_LINE('Excellent');
+ELSIF grade = 'B' THEN
+	DBMS_OUTPUT.PUT_LINE('Very Good');
+ELSIF grade = 'C' THEN
+	DBMS_OUTPUT.PUT_LINE('Good');
+ELSIF grade = 'D' THEN
+	DBMS_OUTPUT.PUT_LINE('Fair');
+ELSIF grade = 'F' THEN
+	DBMS_OUTPUT.PUT_LINE('Poor');
+ELSE
+	DBMS_OUTPUT.PUT_LINE('No such grade');
+END IF;
+
+Con CASE tenemos el siguiente codigo:
+
+CASE grade 
+	WHEN 'A' THEN DBMS_OUTPUT.PUT_LINE('Excellent');
+	WHEN 'B' THEN DBMS_OUTPUT.PUT_LINE('Very Good');
+	WHEN 'C' THEN DBMS_OUTPUT.PUT_LINE('Good');
+	WHEN 'D' THEN DBMS_OUTPUT.PUT_LINE('Fair');
+	WHEN 'F' THEN DBMS_OUTPUT.PUT_LINE('Poor');
+	ELSE DBMS_OUTPUT.PUT_LINE('No such grade');
+END CASE;
+
+Ejemplo acondicionado a bloques
+
+DECLARE 
+	v_Numeroasientos aulas.numeroasientos%TYPE;
+	v_Comentario VARCHAR2(35);
+BEGIN
+/*Recupera el número de asientos del aula con  ID 99999 y almacena el resultado en v_Numeroasientos.*/
+	SELECT numeroasientos 
+	INTO v_Numeroasientos
+	FROM aulas
+	WHERE idaula = 99999;
+	IF v_Numeroasientos < 50 THEN
+		v_Comentario := 'Bastante pequeña';
+	ELSIF v_Numeroasientos < 100 THEN
+		v_Comentario := 'Grande';
+	ELSE 
+		v_Comentario := 'Muy Grande';
+	END IF;
+END;
+/
+
+/*---------------------------------------------------------------------------------------*/
+
+Bucles 
+PL/SQL utiliza los bucles para ejecutar órdenes de forma repetida
+
+Bucles simples
+Los bucles simples tienen la siguiente sintaxis:
+LOOP
+secuencia_de_instrucciones;
+EXIT [WHEN condicion];
+END LOOP;
+
+La sintaxix EXIT[WHEN condicion] es equivalente a :
+IF condicion THEN 
+EXIT;
+END IF;
+
+Por lo tanto, la sintaxis completa del bucle simple es la siguiente:
+
+LOOP
+secuencia_de_instrucciones;
+IF condicion THEN
+EXIT;
+END IF;
+END LOOP;
+
+Ejemplo
+
+DECLARE
+v_Contador BINARY_INTEGER := 1;
+BEGIN
+LOOP
+--Inserte una fila e la tabla temporal con el valor actual
+--del contador del bucle.
+INSERT INTO temporal
+VALUES (v_Contador, 'Indice del bucle');
+v_Contador := v_Contador + 1;
+--Se sale del bucle si su contador super el valor 50
+IF v_Contador > 50 THEN
+EXIT;
+END IF;
+END LOOP;
+END;
+/
+
+DECLARE
+v_Contador BINARY_INTEGER := 1;
+BEGIN
+LOOP
+--Inserte una fila e la tabla temporal con el valor actual
+--del contador del bucle.
+INSERT INTO temporal
+VALUES (v_Contador, 'Indice del bucle');
+v_Contador := v_Contador + 1;
+--Se sale del bucle si su contador super el valor 50
+EXIT WHEN v_Contador >50;
+END IF;
+END LOOP;
+END;
+/
+
+Bucles WHILE
+La sintaxis de un bucle WHILEes la siguiente:
+WHILE condicion LOOP
+secuencia_de_instrucciones
+END LOOP;
+
+Se produce una evaluación de la condicion previa  a cada iteracion del bucle. Si la condicion es verdadera, se ejecuta la secuencia de ordenes, pero si es falsa, el bucle termina y se transfiere el control a las instrucciones posteriores a END LOOP. A continuación, se presenta un ejemplo de bucle WHILE que comprueba el contador del bucle antes de cada iteracion para asegurar que es menor a 50. Si este hecho ocurre, se inserta una fila en la tabla temporal con el valor actual del contador del bucle y se sale del bucle cuando su contador super el balor 50.
+
+DECLARE 
+v_Contador BINARY_INTEGER := 1;
+BEGIN
+--Comprueba el contador del bucle antes de cada iteracion
+--para asegurar que es menor que 50.
+WHILE v_Contador <= 50 LOOP
+INSERT INTO temporal 
+VALUES (v_Contador, 'indice del bucle');
+v_Contador := v_Contador + 1;
+END LOOP;
+END;
+/
+Tambien se pueden utilizar las ordenes EXIT y EXIT WHEN dentro de un bucle WHILE para salir del bucle de forma prematura. La sintaxis sera:
+
+Bucles FOR numericos
+Los bucles FOR numericos disponen de un numero de iteraciones definido. Ya hemos visto que en los bucles simples y WHILE el numero de iteraciones depende de la condicion del bucle y no se conoce de antemano. La sintaxis es la siguiente:
+FOR contador IN [REVERSE] limite_inferior..limite_superior
+LOOP
+secuencia_de_instrucciones
+END LOOP;
+El contador del bucle se declara de modo explicito, el limite inferior y el limite superior acotan el numero de iteraciones (solo se declaran una vez) y la secuencia de ordenes es el contenido del bucle. A continuacion, se presenta un ejemplo:
+DECLARE 
+v_Contador NUMBER := 7;
+--Inserta el valor 7 en la tabla temporal.
+INSERT INTO temporal (columnanumerica)
+VALUES (v_Contador);
+--Este bucle redeclara v_Contador con BINARY_INTEGER,
+--lo que anula la declaracion NUMBER de v_Contador
+FOR v_Contador IN 20..30 LOOP
+--El rango de v_Contador dentro del bucle es de 20 a 30
+INSERT INTO temporal (columnanumerica)
+VALUES (v_Contadoor);
+END LOOP;
+--Insertar 7 en la tabla temporal otra vez
+INSERT INTO temporal (columnanumerica)
+values(v_Contador);
+END;
+/
+
+Ordenes GOTO y etiquetas
+PL/SQL dispone de la orden de salto GO TO. Para identificar el lugar al que se tiene que realizar el salto, se utiliza una etiqueta que suele encerrarse entre corchetes angulares dobles. La sintaxis es la siguiente:
+GO TO etiqueta;
+
+Ejemplo:
+...
+GOTO insertar_fila
+<<insertar_fila>>
+INSERT INTO emp VALUES...
+END;
+
+Ejemplos con bloques 
+DECLARE v_Contador BINARY_INTEGER := 1;
+BEGIN
+LOOP
+INSERT INTO temporal
+VALUES (v_Contador,'Contador Bucle');
+v_Contador = v_Contador +1;
+IF v_Contador > 50 THEN
+GOTO 1_FinDeBucle;
+END IF;
+END LOOP;
+
+<<1_FinDeBucle>>
+INSERT INTO temporal (columnacaracter)
+VALUES('Hecho!');
+END;
+/
+
+Orden NULL
+La orden NULL se utiliza dentro de los programas PL/SQL para indicar que no se realice ninguna acción. A continuacion, se presenta un ejemplo en el que cuando no se cumple la condicion de IF no se realiza ninguna accion.
+
+IF rating > 90 THEN
+compute_bonus(emp_id);
+ELSE
+NULL;
+END IF;
+
+Ejemplo:
+
+DECLARE V_Tempvar NUMBER := 7;
+BEGIN
+IF v_TempVar < 5 THEN
+INSERT INTO temporal (columnacaracter)
+values('Demasiado pequeño');
+ELSIF v_TempVar < 10 THEN
+INSERT INTO temporal (columnacaracter)
+VALUES ('Justo a la derecha');
+ELSE
+NULL; --No se ejecuta ninguna accion
+END IF;
+END;
+/
+
+
+/*---------------------------------------------------------------------------------------*/
+
+Registros, Tablas y Matrices
+
+El paquete estandar PL/SQL tiene predefinidos los tipos escalares, sin embargo, los tipos compuestos deben ser definidos por el usuario antes de ser asignados a alguna variable. Los registros, junto con las tablas, forman tipos compuestos de PL/SQL. Los registros proporcionan un mecanismo para tratar con variables distintas que esten relacionadas entre si, para tratarlas como una unidad. Un registro es una estructura de datos en PL/SQL, almacenados en campos, cada uno de los cuales tiene su propio nombre y tipo y que se tratan como una sola unidad logica. Los registros de PL/SQL son similares a las estructuras del lenguaje C.
+La sintaxis general para definir un tipo de registro es el siguiente:
+
+TYPE tipo_registro IS RECORD(
+Campo1 tipo1 [NOT NULL] [:=expr1],
+Campo2 tipo2 [NOT NULL] [:=expr2],
+Campon tipon [NOT NULL] [:=exprn]);
+
+El nombre del nuevo registro tipo_registro y los nombres de los campos que lo componen son campo1, campo2, ..., campon.Los posibles valores iniciales de los campos son expr1, expr2, ..., exprn. Cada declaracion de campo se asemeja a una declaracion de variable.
+
+Ejemplo:
+
+TYPE t_RegistroEstudiante IS RECORD (
+ID NUMBER(5),
+Nombre VARCHAR(20),
+Apellido VARCHAR(20)
+);
+
+DECLARE 
+TYPE TimeRec IS RECORD (
+seconds SMALLINT,
+minutes SMALLINT,
+hours SMALLINT);
+TYPE FlightRec IS RECORD(
+flight_no INTEGER,
+plane_id VARCHAR2(10),
+airport_code VARCHAR2(10));
+
+Utilización de %TYPE y %ROWTYPE
+
+%TYPE se utiliza para definir una variable con el mismo tipo que una columna de la base de datos. De igual forma, %ROWTYPE se utiliza para definir un registro con el mismo tipo que una fila de la base de datos.
+
+Se define un registro utilizando %TYPE
+DECLARE 
+TYPE DeptRec IS RECORD(
+dept_id dept.deptno%TYPE,
+dept_name VARCHAR2(15),
+dept_loc VARCHAR2(15));
+Luego se usa %ROWTYPE para definir un registro cuyos campos se corresponderian con las columnas de la tabla DEPT
+DECLARE
+DeptRecl %ROWTYPE
+
+/*---------------------------------------------------------------------------------------*/
+
+Cursores 
+Dentro de PL/SQL la orden SELECT no debe devolver mas de una fila. Si es necesario que select devuelva mas de una fila, hay que emplear un cursor explicito para extraer individualmente cada fila.
+
+Cursores explicitos 
+Un cursor explicito se declara mediante la sintaxis siguiente:
+
+CURSOR nombre_cursor IS orden_SELECT
+
+El cursor explicito se abre mediante la siguiente sintaxis:
+OPEN nombre cursor
+
+La extraccion de los datos y su recogida en variables PL/SQL se realiza mediante la siguiente sintaxis:
+
+FETCH nombre_cursor INTO lista_variables;
+FETCH nombre_cursor INTO registro_PL/SQL;
+
+La sintaxis nombre_cursor identifica un cursor previamente declarado y abierto, lista_variables es una lidas de variables PL/SQL previamente declaradas y separadas por comas y registro_PL/SQL es un registro PL/SQL previamente declarado.
+
+El cierre de un cursor explicito se realiza mediante la sintaxis:
+
+CLOSE nombre_cursor
+
+Entre los atributos de los cursores tenemos %FOUND y %NOTFOUND para controlar si la ultima orden FETCH devolvió o no una fila, %ISOPEN para ver si el cursor esta o no abierto y %ROWCOUNT que devuelve el numero de filas extraidas por el cursor hasta ahora.
+
+Tambien existe un tipo de cursor que admite parametros como argumentos al estilo de los procedimientos de los lenguajes de programacion procedimentales. Este tipo de cursores se denomina cursores parametrizados.
+
+En el ejemplo se presenta un bucle de extraccion mediante cursor explicito en el que una consulta devuelve multiples filas de datos.
+
+DECLARE 
+/*Variables de salida para almacenar los resultados de la consulta*/
+v_EstudianteID estudiantes.id%TYPE;
+v_Nombre estudiantes.nombre%TYPE;
+v_Apellido estudiantes.apellido%TYPE;
+/*Variable de acoplamiento usada en la consulta*/
+v_Especialidad estudiantes.especialidad%TYPE := 'Computer Science';
+/*Declaracion del cursor*/
+Cursor c_Estudiantes IS
+SELECT id, nombre, apellido FROM estudiantes WHERE especialidad = v_Especialidad;
+BEGIN
+/*Identificar filas y preparar el procesamiento */
+OPEN c_Estudiantes;
+LOOP
+/*Recuperar cada fila del conjunto activo y almacenarlas en variables PL/SQL*/
+FECTH c_Estudiantes INTO v_EstudianteID,v_Nombre,v_Apellido;
+/*Si no hya mas filas que recuperar, salir del bucle*/
+EXIT WHEN c_Estuddiantes%NOTFOUND;
+END LOOP;
+/*Liberar los recursores utilizados por la consola*/
+CLOSE c_Estudiantes;
+END;
+/
+
+
+/*---------------------------------------------------------------------------------------*/
+
+Subprogramas: Procedimientos, funciones, paquetes y disparadores.
